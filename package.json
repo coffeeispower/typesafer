@@ -1,0 +1,31 @@
+{
+  "name": "typesafer",
+  "packageManager": "bun@1.4.3",
+  "main": "src/main.ts",
+  "scripts": {
+    "check": "tsc -b tsconfig.json",
+    "lint": "eslint \"./{src,test,examples,scripts,dtslint}/**/*.{ts,mjs}\"",
+    "lint-fix": "bun lint --fix",
+    "coverage": "bun --tsconfig-override=tsconfig.test.json test --coverage"
+  },
+  "dependencies": {
+    "@effect/platform-bun": "^4.1.4",
+    "@json-schema-tools/meta-schema": "^1.8.3",
+    "effect": "^4.1.4"
+  },
+  "devDependencies": {
+    "@effect/eslint-plugin": "^0.3.2",
+    "@eslint/compat": "^2.1.1",
+    "@eslint/eslintrc": "^3.3.7",
+    "@eslint/js": "^10.0.1",
+    "@types/bun": "^1.4.4",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.72.2",
+    "eslint": "^10.14.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-codegen": "^0.34.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "eslint-plugin-sort-destructure-keys": "^3.0.0"
+  }
+}

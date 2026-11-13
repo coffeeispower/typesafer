@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": ["test"],
+  "references": [{ "path": "tsconfig.src.json" }],
+  "compilerOptions": {
+    "types": ["bun"],
+    "tsBuildInfoFile": ".tsbuildinfo/test.tsbuildinfo",
+    "moduleResolution": "bundler",
+    "module": "preserve",
+    "rootDir": "test",
+    "noEmit": true
+
+  }
+}
