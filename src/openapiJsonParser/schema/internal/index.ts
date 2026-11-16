@@ -1,6 +1,5 @@
-import { Effect, pipe, Schema, SchemaGetter, SchemaIssue } from "effect"
+import { Effect, Schema, SchemaGetter } from "effect"
 import * as ReferenceResolver from "./referenceResolver"
-import * as internal from "./referenceResolver/internal"
 import { Resolved } from "./resolved"
 import { WithReferences } from "./withReferences"
 

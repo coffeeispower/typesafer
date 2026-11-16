@@ -1,5 +1,4 @@
 import type { Effect } from "effect"
-import { Data } from "effect"
 import type { RawDocument, ResolvedDocument } from ".."
 import * as internal from "./internal"
 

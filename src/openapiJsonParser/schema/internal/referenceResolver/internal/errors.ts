@@ -1,5 +1,5 @@
-import { Data, Effect, Match, Option, Result, Schema, SchemaAST, SchemaIssue } from "effect"
-import { SchemaError } from "effect/Schema"
+import { Data, Match, Result, SchemaAST, SchemaIssue } from "effect"
+import type { SchemaError } from "effect/Schema"
 import * as refPointer from "./refPointer"
 
 type InvalidReferenceData =
@@ -98,19 +98,4 @@ export class InvalidReference
     )
     return atRefPropertyLocation(coreError)
   }
-}
-
-if (import.meta.main) {
-  const schema = Schema.Struct({ a: Schema.Int })
-  const parseError = Schema.decodeUnknownResult(schema)({ a: "test" }).pipe(Result.getFailure, Option.getOrThrow)
-  const issue = new InvalidReference({
-    data: {
-      reason: "InvalidSchema",
-      ref: "#/non/existent",
-      refPropertyLocation: "#/somewhere/$ref",
-      schemaError: parseError,
-      ast: schema.ast
-    }
-  }).toSchemaIssue()
-  throw new SchemaError(issue)
 }
