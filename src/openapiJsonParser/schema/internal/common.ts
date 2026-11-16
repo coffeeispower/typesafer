@@ -1,22 +1,28 @@
 import { Schema } from "effect"
 
 export namespace Common {
-  export const JsonValue = Schema.Unknown
-  export const UriReference = Schema.String
-  export const OptionalString = Schema.optional(Schema.String)
-  export const OptionalBoolean = Schema.optional(Schema.Boolean)
+  export const JsonValue = Schema.Unknown.pipe(Schema.annotate({ identifier: "OpenAPI.Common.JsonValue" }))
+  export const UriReference = Schema.String.pipe(Schema.annotate({ identifier: "OpenAPI.Common.UriReference" }))
+  export const OptionalString = Schema.optional(Schema.String).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Common.OptionalString" })
+  )
+  export const OptionalBoolean = Schema.optional(Schema.Boolean).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Common.OptionalBoolean" })
+  )
 
-  export const ExternalDocumentation = Schema.Struct({ description: OptionalString, url: UriReference })
+  export const ExternalDocumentation = Schema.Struct({ description: OptionalString, url: UriReference }).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Common.ExternalDocumentation" })
+  )
   const Contact = Schema.Struct({
     name: OptionalString,
     url: Schema.optional(UriReference),
     email: Schema.optional(Schema.String)
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.Contact" }))
   const License = Schema.Struct({
     name: Schema.String,
     url: Schema.optional(UriReference),
     identifier: Schema.optional(Schema.String)
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.License" }))
   export const Info = Schema.Struct({
     title: Schema.String,
     description: OptionalString,
@@ -24,23 +30,23 @@ export namespace Common {
     contact: Schema.optional(Contact),
     license: Schema.optional(License),
     version: Schema.String
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.Info" }))
   const ServerVariable = Schema.Struct({
     enum: Schema.optional(Schema.Array(Schema.String)),
     default: Schema.String,
     description: OptionalString
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.ServerVariable" }))
   export const Server = Schema.Struct({
     url: Schema.String,
     description: OptionalString,
     variables: Schema.optional(Schema.Record(Schema.String, ServerVariable))
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.Server" }))
   export const Example = Schema.Struct({
     summary: OptionalString,
     description: OptionalString,
     value: Schema.optional(JsonValue),
     externalValue: Schema.optional(UriReference)
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.Example" }))
   export const Link = Schema.Struct({
     operationId: OptionalString,
     operationRef: Schema.optional(UriReference),
@@ -48,19 +54,21 @@ export namespace Common {
     requestBody: Schema.optional(JsonValue),
     description: OptionalString,
     server: Schema.optional(Server)
-  })
-  export const SecurityRequirement = Schema.Record(Schema.String, Schema.Array(Schema.String))
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.Link" }))
+  export const SecurityRequirement = Schema.Record(Schema.String, Schema.Array(Schema.String)).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Common.SecurityRequirement" })
+  )
   export const Discriminator = Schema.Struct({
     propertyName: Schema.String,
     mapping: Schema.optional(Schema.Record(Schema.String, Schema.String))
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.Discriminator" }))
   export const XML = Schema.Struct({
     name: OptionalString,
     namespace: Schema.optional(UriReference),
     prefix: OptionalString,
     attribute: OptionalBoolean,
     wrapped: OptionalBoolean
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.XML" }))
 
   export const SchemaFields = {
     title: OptionalString,
@@ -147,9 +155,12 @@ export namespace Common {
     name: Schema.String,
     description: OptionalString,
     externalDocs: Schema.optional(ExternalDocumentation)
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.Tag" }))
 
-  export const OpenApiVersion = Schema.String.pipe(Schema.check(Schema.isPattern(/^3\.\d\.\d(?:-.+)?$/)))
+  export const OpenApiVersion = Schema.String.pipe(
+    Schema.check(Schema.isPattern(/^3\.\d\.\d(?:-.+)?$/)),
+    Schema.annotate({ identifier: "OpenAPI.Common.OpenApiVersion" })
+  )
   export const DocumentFields = {
     openapi: OpenApiVersion,
     info: Info,
@@ -183,7 +194,9 @@ export namespace Common {
   export type EncodingCommonFieldsType = Schema.Struct<typeof EncodingFields>["Type"]
   export type ResponseCommonFieldsType = Schema.Struct<typeof ResponseFields>["Type"]
 
-  export const OAuthScope = Schema.Record(Schema.String, Schema.String)
+  export const OAuthScope = Schema.Record(Schema.String, Schema.String).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Common.OAuthScope" })
+  )
   export const OAuthFlows = Schema.Struct({
     implicit: Schema.optional(
       Schema.Struct({ authorizationUrl: UriReference, refreshUrl: Schema.optional(UriReference), scopes: OAuthScope })
@@ -202,7 +215,7 @@ export namespace Common {
         scopes: OAuthScope
       })
     )
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Common.OAuthFlows" }))
 
   export const SecurityScheme = Schema.Union([
     Schema.Struct({
@@ -223,5 +236,5 @@ export namespace Common {
       openIdConnectUrl: UriReference,
       description: OptionalString
     })
-  ])
+  ]).pipe(Schema.annotate({ identifier: "OpenAPI.Common.SecurityScheme" }))
 }

@@ -6,5 +6,5 @@ export const InvalidReference = internal.errors.InvalidReference
 export type InvalidReference = internal.errors.InvalidReference
 export const resolveReferences: (rawDocument: RawDocument) => Effect.Effect<ResolvedDocument, InvalidReference> =
   internal.resolveReferences
-export const rollbackResolution: (rawDocument: ResolvedDocument) => Effect.Effect<RawDocument, never> =
+export const rollbackResolution: (resolvedDocument: ResolvedDocument) => Effect.Effect<RawDocument, never> =
   internal.rollbackResolution

@@ -20,6 +20,6 @@ it.effect(
     const document = yield* Schema.decodeUnknownEffect(OpenAPISchema.Document)(discordOpenApi as unknown)
     expect(document.info.title).toBe("Discord HTTP API (Preview)")
     const reencoded = yield* Schema.encodeUnknownEffect(OpenAPISchema.Document)(document)
-    expect(document).toEqual(reencoded)
+    expect(document as unknown).toEqual(reencoded as unknown)
   })
 )

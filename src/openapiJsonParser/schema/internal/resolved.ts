@@ -11,7 +11,9 @@ export namespace Resolved {
     readonly properties?: Readonly<Record<string, SchemaObject>> | undefined
     readonly additionalProperties?: SchemaObject | boolean | undefined
   }
-  const SchemaObjectFn = Schema.suspend((): Schema.Codec<SchemaObject> => SchemaObject)
+  const SchemaObjectFn = Schema.suspend((): Schema.Codec<SchemaObject> => SchemaObject).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Resolved.SchemaObject" })
+  )
 
   const SchemaObject: Schema.Codec<SchemaObject> = Schema.Struct({
     ...Common.SchemaFields,
@@ -22,7 +24,9 @@ export namespace Resolved {
     items: Schema.optional(SchemaObjectFn),
     properties: Schema.optional(Schema.Record(Schema.String, SchemaObjectFn)),
     additionalProperties: Schema.optional(Schema.Union([SchemaObjectFn, Schema.Boolean]))
-  }).pipe((s) => Schema.StructWithRest(s, [Schema.Record(Schema.String, Schema.Any)]))
+  })
+    .pipe((s) => Schema.StructWithRest(s, [Schema.Record(Schema.String, Schema.Any)]))
+    .pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.SchemaObject" }))
 
   export interface Encoding extends Common.EncodingCommonFieldsType {
     readonly headers?: Readonly<Record<string, Header>> | undefined
@@ -37,28 +41,34 @@ export namespace Resolved {
     readonly content?: Readonly<Record<string, MediaType>> | undefined
     readonly examples?: Readonly<Record<string, typeof Common.Example.Type>> | undefined
   }
-  const EncodingFn = Schema.suspend((): Schema.Codec<Encoding> => Encoding)
-  const MediaTypeFn = Schema.suspend((): Schema.Codec<MediaType> => MediaType)
-  const HeaderFn = Schema.suspend((): Schema.Codec<Header> => Header)
+  const EncodingFn = Schema.suspend((): Schema.Codec<Encoding> => Encoding).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Resolved.Encoding" })
+  )
+  const MediaTypeFn = Schema.suspend((): Schema.Codec<MediaType> => MediaType).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Resolved.MediaType" })
+  )
+  const HeaderFn = Schema.suspend((): Schema.Codec<Header> => Header).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Resolved.Header" })
+  )
 
   const MediaType: Schema.Codec<MediaType> = Schema.Struct({
     ...Common.MediaTypeFields,
     schema: Schema.optional(SchemaObjectFn),
     examples: Schema.optional(Schema.Record(Schema.String, Common.Example)),
     encoding: Schema.optional(Schema.Record(Schema.String, EncodingFn))
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.MediaType" }))
 
   const Header: Schema.Codec<Header> = Schema.Struct({
     ...Common.HeaderFields,
     schema: Schema.optional(SchemaObjectFn),
     content: Schema.optional(Schema.Record(Schema.String, MediaTypeFn)),
     examples: Schema.optional(Schema.Record(Schema.String, Common.Example))
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.Header" }))
 
   const Encoding: Schema.Codec<Encoding> = Schema.Struct({
     ...Common.EncodingFields,
     headers: Schema.optional(Schema.Record(Schema.String, HeaderFn))
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.Encoding" }))
 
   export interface Response extends Common.ResponseCommonFieldsType {
     readonly headers?: Readonly<Record<string, Header>> | undefined
@@ -70,8 +80,10 @@ export namespace Resolved {
     headers: Schema.optional(Schema.Record(Schema.String, HeaderFn)),
     content: Schema.optional(Schema.Record(Schema.String, MediaTypeFn)),
     links: Schema.optional(Schema.Record(Schema.String, Common.Link))
-  })
-  const Responses = Schema.Record(Schema.String, Response)
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.Response" }))
+  const Responses = Schema.Record(Schema.String, Response).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Resolved.Responses" })
+  )
 
   export interface Parameter extends Common.ParameterCommonFieldsType {
     readonly schema?: SchemaObject | undefined
@@ -102,7 +114,7 @@ export namespace Resolved {
       style: Schema.optional(Schema.Literal("simple"))
     }),
     Schema.Struct({ ...ParameterFields, in: Schema.Literal("cookie"), style: Schema.optional(Schema.Literal("form")) })
-  ])
+  ]).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.Parameter" }))
 
   export interface RequestBody extends Common.RequestBodyCommonFieldsType {
     readonly content: Readonly<Record<string, MediaType>>
@@ -110,8 +122,8 @@ export namespace Resolved {
   const RequestBody: Schema.Codec<RequestBody> = Schema.Struct({
     ...Common.RequestBodyFields,
     content: Schema.Record(Schema.String, MediaTypeFn)
-  })
-  const SecurityScheme = Common.SecurityScheme
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.RequestBody" }))
+  const SecurityScheme = Common.SecurityScheme.pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.SecurityScheme" }))
 
   export interface Operation extends Common.OperationCommonFieldsType {
     readonly parameters?: ReadonlyArray<typeof Parameter.Type> | undefined
@@ -141,7 +153,7 @@ export namespace Resolved {
       }),
       [Schema.Record(Schema.String, Schema.Any)]
     )
-  )
+  ).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.Operation" }))
   const PathItemFn = Schema.suspend((): Schema.Codec<PathItem> =>
     Schema.Struct({
       ...Common.PathItemFields,
@@ -155,9 +167,11 @@ export namespace Resolved {
       trace: Schema.optional(OperationFn),
       parameters: Schema.optional(Schema.Array(Parameter))
     })
+  ).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.PathItem" }))
+  const CallbackFn = Schema.suspend((): Schema.Codec<Callback> => Schema.Record(Schema.String, PathItemFn)).pipe(
+    Schema.annotate({ identifier: "OpenAPI.Resolved.Callback" })
   )
-  const CallbackFn = Schema.suspend((): Schema.Codec<Callback> => Schema.Record(Schema.String, PathItemFn))
-  const Paths = Schema.Record(Schema.String, PathItemFn)
+  const Paths = Schema.Record(Schema.String, PathItemFn).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.Paths" }))
 
   const Components = Schema.Struct({
     schemas: Schema.optional(Schema.Record(Schema.String, SchemaObject)),
@@ -169,11 +183,11 @@ export namespace Resolved {
     securitySchemes: Schema.optional(Schema.Record(Schema.String, SecurityScheme)),
     links: Schema.optional(Schema.Record(Schema.String, Common.Link)),
     callbacks: Schema.optional(Schema.Record(Schema.String, CallbackFn))
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.Components" }))
 
   export const Document = Schema.Struct({
     ...Common.DocumentFields,
     paths: Paths,
     components: Schema.optional(Components)
-  })
+  }).pipe(Schema.annotate({ identifier: "OpenAPI.Resolved.Document" }))
 }
