@@ -10,3 +10,8 @@ export const Document: Schema.Codec<
 > = internal.AutoResolvingDocument.pipe(
   Schema.annotate({ identifier: "OpenAPI.Document" })
 )
+
+export const DocumentFromJson: Schema.Codec<
+  typeof internal.Resolved.Document.Type,
+  string
+> = Document.pipe(Schema.fromJsonString)
