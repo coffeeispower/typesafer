@@ -2,7 +2,9 @@ import { Schema } from "effect"
 import { Common } from "./common"
 
 export namespace WithReferences {
-  const Reference = Schema.Struct({ $ref: Schema.String }).pipe((s) => Schema.StructWithRest(s, [Schema.Record(Schema.String, Schema.Any)]))
+  const Reference = Schema.Struct({ $ref: Schema.String }).pipe((s) =>
+    Schema.StructWithRest(s, [Schema.Record(Schema.String, Schema.Any)])
+  )
   const refOr = <S extends Schema.Constraint>(schema: S) => Schema.Union([Reference, schema])
   type Reference = typeof Reference.Type
   export interface SchemaObject extends Common.SchemaCommonFieldsType, Record<string, any> {

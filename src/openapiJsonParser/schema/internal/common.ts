@@ -12,7 +12,11 @@ export namespace Common {
     url: Schema.optional(UriReference),
     email: Schema.optional(Schema.String)
   })
-  const License = Schema.Struct({ name: Schema.String, url: Schema.optional(UriReference), identifier: Schema.optional(Schema.String) })
+  const License = Schema.Struct({
+    name: Schema.String,
+    url: Schema.optional(UriReference),
+    identifier: Schema.optional(Schema.String)
+  })
   export const Info = Schema.Struct({
     title: Schema.String,
     description: OptionalString,

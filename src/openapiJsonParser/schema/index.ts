@@ -1,7 +1,6 @@
-import { WithReferences } from "./withReferences"
+import type { Schema } from "effect"
+import * as internal from "./internal"
 
-export { Common } from "./common"
-export { Resolved } from "./resolved"
-export { WithReferences }
-
-export const RawDocument = WithReferences.Document
+export const RawDocument = internal.WithReferences.Document
+export const Document: Schema.Codec<typeof internal.Resolved.Document.Type, typeof RawDocument.Type> =
+  internal.AutoResolvingDocument
