@@ -1,6 +1,8 @@
-import { expect, it } from "bun:test"
-import { Effect, HashSet, Schema } from "effect"
+import { describe, expect, it } from "bun:test"
+import { Effect, Equal, HashSet, Schema } from "effect"
 import * as resolver from "./circularReferenceChecker"
+import { formatHashSetWithTag } from "./formatHashSet"
+import { ObjectPathCyclicSequence } from "./cyclicReference"
 
 export class ResolverTestCase extends Schema.Class<ResolverTestCase>("ResolverTestCase")(
   {
@@ -11,10 +13,10 @@ export class ResolverTestCase extends Schema.Class<ResolverTestCase>("ResolverTe
   }
 ) {
   get expectedResultDisplay() {
-    return new Set(this.expectedResult)
+    return formatHashSetWithTag(this.expectedResult)
   }
 }
-const testCases = [
+const resolverTestCases = [
   new ResolverTestCase({
     guineaPig: { a: 50, b: 10 }
   }),
@@ -43,7 +45,7 @@ const testCases = [
   new ResolverTestCase({
     expectedResult: HashSet.make(
       new resolver.IndirectCircularReference({
-        keysRing: [["a"], ["b"], ["c", "b"]]
+        keysRing: ObjectPathCyclicSequence.from(["a"], ["b"], ["c", "b"])
       })
     ),
     guineaPig: {
@@ -90,7 +92,7 @@ const testCases = [
   new ResolverTestCase({
     expectedResult: HashSet.make(
       new resolver.IndirectCircularReference({
-        keysRing: [["a", "b"], ["c", "d"], ["e", "f", "g"]]
+        keysRing: ObjectPathCyclicSequence.from(["a", "b"], ["c", "d"], ["e", "f", "g"])
       })
     ),
     guineaPig: {
@@ -112,7 +114,7 @@ const testCases = [
   new ResolverTestCase({
     expectedResult: HashSet.make(
       new resolver.IndirectCircularReference({
-        keysRing: [["a", "x"], ["b", "y"], ["c", "z"]]
+        keysRing: ObjectPathCyclicSequence.from(["a", "x"], ["b", "y"], ["c", "z"])
       })
     ),
     guineaPig: {
@@ -132,10 +134,10 @@ const testCases = [
   new ResolverTestCase({
     expectedResult: HashSet.make(
       new resolver.IndirectCircularReference({
-        keysRing: [["a"], ["b"]]
+        keysRing: ObjectPathCyclicSequence.from(["a"], ["b"])
       }),
       new resolver.IndirectCircularReference({
-        keysRing: [["c"], ["d"]]
+        keysRing: ObjectPathCyclicSequence.from(["c"], ["d"])
       })
     ),
     guineaPig: {
@@ -194,7 +196,7 @@ const testCases = [
   new ResolverTestCase({
     expectedResult: HashSet.make(
       new resolver.IndirectCircularReference({
-        keysRing: [["a", "0"], ["b", "1"]]
+        keysRing: ObjectPathCyclicSequence.from(["a", 0], ["b", 1])
       })
     ),
     guineaPig: {
@@ -210,7 +212,7 @@ const testCases = [
   new ResolverTestCase({
     expectedResult: HashSet.make(
       new resolver.IndirectCircularReference({
-        keysRing: [["a"], ["b"], ["c"], ["d"], ["e"]]
+        keysRing: ObjectPathCyclicSequence.from(["a"], ["b"], ["c"], ["d"], ["e"])
       })
     ),
     guineaPig: {
@@ -245,11 +247,11 @@ const testCases = [
   new ResolverTestCase({
     expectedResult: HashSet.make(
       new resolver.IndirectCircularReference({
-        keysRing: [
+        keysRing: ObjectPathCyclicSequence.from(
           ["a", "b", "c"],
           ["x", "y"],
           ["p", "q", "r"]
-        ]
+        )
       })
     ),
     guineaPig: {
@@ -305,11 +307,13 @@ const testCases = [
   })
 ]
 
-it.each(testCases)(
-  "resolver.checkForCircularReferences($guineaPig) returns $expectedResultDisplay",
-  ({ expectedResult, guineaPig }) => {
-    expect(
-      new Set(resolver.checkForCircularReferences(guineaPig))
-    ).toEqual(new Set(expectedResult))
-  }
-)
+describe("resolver.checkForCircularReferences", () => {
+  it.each(resolverTestCases)(
+    "resolver.checkForCircularReferences($guineaPig) returns $expectedResultDisplay",
+    ({ expectedResult, guineaPig }) => {
+      expect(
+        resolver.checkForCircularReferences(guineaPig)
+      ).toSatisfy(Equal.equals(expectedResult))
+    }
+  )
+})

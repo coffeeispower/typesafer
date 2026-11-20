@@ -1,10 +1,10 @@
-import { Schema } from "effect"
+import { JsonPointer, Schema } from "effect"
 import { Common } from "./common"
 
+export const Reference = Schema.Struct({ $ref: Schema.String.pipe(Schema.check(Schema.makeFilter(($ref) => JsonPointer.parseUriFragment($ref) ? [] : Array.of<Schema.FilterIssue>( {issue: "JsonPointer.parseUriFragment failed", path: []})))) })
+  .pipe((s) => Schema.StructWithRest(s, [Schema.Record(Schema.String, Schema.Any)]))
+  .pipe(Schema.annotate({ identifier: "OpenAPI.WithReferences.Reference" }))
 export namespace WithReferences {
-  const Reference = Schema.Struct({ $ref: Schema.String })
-    .pipe((s) => Schema.StructWithRest(s, [Schema.Record(Schema.String, Schema.Any)]))
-    .pipe(Schema.annotate({ identifier: "OpenAPI.WithReferences.Reference" }))
   const refOr = <S extends Schema.Constraint>(schema: S) =>
     Schema.Union([Reference, schema]).pipe(Schema.annotate({ identifier: "OpenAPI.WithReferences.ReferenceOr" }))
   type Reference = typeof Reference.Type
