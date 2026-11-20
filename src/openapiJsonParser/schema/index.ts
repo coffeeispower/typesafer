@@ -8,3 +8,4 @@ export const DocumentFromJson: Schema.Codec<
   typeof Document.Type,
   string
 > = Document.pipe(Schema.fromJsonString)
+export {Reference} from "./internal"

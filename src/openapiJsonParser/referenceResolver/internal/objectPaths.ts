@@ -1,8 +1,7 @@
 import { Equal, HashSet, JsonPointer, type MutableHashSet, Option, Schema, SchemaAST } from "effect"
 import * as Array from "effect/Array"
 import * as Predicate from "effect/Predicate"
-import { Reference } from "../../withReferences"
-
+import {Reference} from "../../schema"
 export const ObjectPath = Schema.Array(Schema.Union([Schema.String, Schema.Natural]))
 export type ObjectPath = typeof ObjectPath.Type
 export type Paths = HashSet.HashSet<ObjectPath>
