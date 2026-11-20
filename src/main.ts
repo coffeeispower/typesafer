@@ -1,20 +1,38 @@
-import { Argument, Command, Flag } from "effect/cli"
-import { BunServices, BunRuntime } from "@effect/platform-bun"
-import { Console, Effect } from "effect"
+import { Argument, Command, Flag } from "effect/cli";
+import { BunServices, BunRuntime } from "@effect/platform-bun";
+import { Effect, Layer, Logger } from "effect";
+import * as OpenApiJsonParser from "./openapiJsonParser";
+const openApiDocument = Argument.FileSchema(
+	"openapi file",
+	OpenApiJsonParser.OpenAPISchema.Document,
+).pipe(
+	Argument.withDescription(
+		"The open api file to convert to effect's HttpApi definitions",
+	),
+);
+const outputDir = Flag.Path("output-dir", {
+	mustExist: true,
+	pathType: "directory",
+}).pipe(
+	Flag.withAlias("o"),
+	Flag.withDefault("."),
+	Flag.withDescription("Where to output the generated code."),
+);
 
-const name = Argument.String("name").pipe(Argument.withDefault("World"))
-const shout = Flag.Boolean("shout").pipe(Flag.withAlias("s"), Flag.withDefault(false))
+const generate = Command.make(
+	"generate",
+	{ openApiDocument, outputDir },
+	Effect.fn("command.generate")(function* ({ openApiDocument, outputDir }) {
+		yield* Effect.never
+	}),
+);
+const typesafer = Command.make("typesafer").pipe(Command.withSubcommands([generate]));
 
-const greet = Command.make("typesafer", { name, shout }, ({ name, shout }) => {
-  const message = `Hello, ${name}!`
-  return Console.log(shout ? message.toUpperCase() : message)
-})
-
-const program = Command.run(greet, {
-  version: "0.1.0-alpha"
-})
-
-program.pipe(
-  Effect.provide(BunServices.layer),
-  BunRuntime.runMain
-)
+const program = Command.run(typesafer, {
+	version: "0.1.0-alpha",
+});
+const prodLayer = Layer.provideMerge(
+	BunServices.layer,
+	Logger.layer([Logger.consolePrettyTty()]),
+);
+program.pipe(Effect.provide(prodLayer), BunRuntime.runMain);
