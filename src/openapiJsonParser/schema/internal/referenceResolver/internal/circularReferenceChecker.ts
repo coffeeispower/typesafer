@@ -1,23 +1,15 @@
 import {
-  Array,
   Duration,
   Equal,
   HashMap,
   HashSet,
   MutableHashSet,
   Option,
-  Ordering,
   pipe,
-  Predicate,
   Schema,
-  SchemaAST
 } from "effect"
-import { JsonPointer } from "effect"
-import { Reference } from "../../withReferences"
-import * as AdjacencyList from "./adjacencyList"
 import * as unfoldObject from "./unfoldObject"
 import { ObjectPathCyclicSequence } from "./cyclicReference"
-import { unfold } from "effect/Iterable"
 
 export class DirectCircularReference extends Schema.TaggedClass<DirectCircularReference>()(
   "DirectCircularReference",
@@ -40,8 +32,6 @@ export const CircularReference = Schema.Union([
 ])
 
 export type CircularReference = typeof CircularReference.Type
-
-type ObjectPath = unfoldObject.ObjectPath
 
 
 /**
