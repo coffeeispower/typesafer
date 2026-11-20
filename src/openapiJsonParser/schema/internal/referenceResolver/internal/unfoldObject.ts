@@ -1,4 +1,4 @@
-import { Equal, HashSet, JsonPointer, Option, Schema, SchemaAST } from "effect"
+import { Equal, HashSet, JsonPointer, type MutableHashSet, Option, Schema, SchemaAST } from "effect"
 import * as Array from "effect/Array"
 import * as Predicate from "effect/Predicate"
 import { Reference } from "../../withReferences"
@@ -6,6 +6,7 @@ import { Reference } from "../../withReferences"
 export const ObjectPath = Schema.Array(Schema.Union([Schema.String, Schema.Natural]))
 export type ObjectPath = typeof ObjectPath.Type
 export type Paths = HashSet.HashSet<ObjectPath>
+export type MutablePaths = MutableHashSet.MutableHashSet<ObjectPath>
 function getPaths(entries: ReadonlyArray<readonly [string | number, unknown]>, base: ObjectPath = []) {
   return entries.map(([key, value]) => {
     const newBase: ObjectPath = [...base, key]
