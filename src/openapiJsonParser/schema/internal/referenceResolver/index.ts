@@ -14,8 +14,6 @@ export type InvalidReference = internal.errors.InvalidReference
  * @returns All detected circular references
  */
 export const getForCircularReferences = internal.circularReferenceChecker.getForCircularReferences;
-export const IndirectCircularReference = internal.circularReferenceChecker.IndirectCircularReference;
-export const DirectCircularReference = internal.circularReferenceChecker.DirectCircularReference;
-export const CircularReference = internal.circularReferenceChecker.DirectCircularReference;
-export const ObjectPathCyclicSequence = internal.circularReferenceChecker.ObjectPathCyclicSequence;
-export const objectPaths = internal.objectPaths;
+
+export {ObjectPathCyclicSequence, CircularReference, DirectCircularReference, IndirectCircularReference} from "./internal/circularReferenceChecker"
+export {objectPaths} from "./internal"

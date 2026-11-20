@@ -1,10 +1,7 @@
 import {
-	Array,
 	Data,
-	type HashSet,
 	JsonPointer,
 	Match,
-	pipe,
 	SchemaAST,
 	SchemaIssue,
 } from "effect";

@@ -34,13 +34,12 @@ export type CircularReference = typeof CircularReference.Type
 
 
 export function getForCircularReferences(
-  object: unknown
+  object: unknown,
+  allPaths = objectPaths.getAllPathsRecursive(object),
+  pathsWithRef = objectPaths.filterPathsWithRef(object, allPaths)
 ): HashSet.HashSet<CircularReference> {
   const cycles = MutableHashSet.empty<CircularReference>();
-
-  const allPaths = objectPaths.getAllPathsRecursive(object);
   const alreadyScannedPaths: objectPaths.MutablePaths = MutableHashSet.empty()
-  const pathsWithRef = objectPaths.filterPathsWithRef(object, allPaths);
   const pathsToRef = HashMap.fromIterable(
     HashSet.map(pathsWithRef, (refPath) => {
       const ref = pipe(objectPaths.extract$ref(object, refPath), (ref) => objectPaths.refToObjectPath(object, ref))
