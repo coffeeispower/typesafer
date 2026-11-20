@@ -1,5 +1,5 @@
 import { Equal, Hash, Schema } from "effect"
-import { ObjectPath } from "./unfoldObject"
+import { ObjectPath } from "./objectPaths"
 
 export const makeCyclicSequence = <S extends Schema.Constraint>(s: S) => class CyclicSequence extends Schema.TaggedClass<CyclicSequence>()("CyclicSequence", {
   elements: Schema.Array(s)

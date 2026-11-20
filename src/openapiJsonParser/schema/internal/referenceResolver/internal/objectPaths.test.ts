@@ -1,10 +1,10 @@
 /* eslint-disable @effect/dprint */
 import { describe, expect, it } from "bun:test"
 import { Effect, HashSet, Option, pipe, Schema } from "effect"
-import { accessPointer, getAllPathsRecursive, isImmediateParent, isParent, ObjectPath } from "./unfoldObject"
+import { accessPointer, getAllPathsRecursive, isImmediateParent, isParent, ObjectPath } from "./objectPaths"
 
 describe("getAllPathsRecursive", () => {
-  class UnfoldTestCase extends Schema.Class<UnfoldTestCase>("UnfoldTestCase")(
+  class GetAllPathsRecursiveTestCase extends Schema.Class<GetAllPathsRecursiveTestCase>("GetAllPathsRecursiveTestCase")(
     {
       expectedResult: Schema.HashSet(ObjectPath).pipe(
         Schema.withConstructorDefault(Effect.sync(HashSet.empty))
@@ -16,13 +16,13 @@ describe("getAllPathsRecursive", () => {
       return new Set(this.expectedResult)
     }
   }
-  const testCases: ReadonlyArray<UnfoldTestCase> = [
-    new UnfoldTestCase({
+  const testCases: ReadonlyArray<GetAllPathsRecursiveTestCase> = [
+    new GetAllPathsRecursiveTestCase({
       guineaPig: { a: { b: { c: "Test", n: 29 } } },
       expectedResult: HashSet.make(["a"], ["a", "b"])
     }),
 
-    new UnfoldTestCase({
+    new GetAllPathsRecursiveTestCase({
       guineaPig: {
         a: {
           b: [
@@ -33,7 +33,7 @@ describe("getAllPathsRecursive", () => {
       },
       expectedResult: HashSet.make(["a"], ["a", "b", 0], ["a", "b", 1])
     }),
-    new UnfoldTestCase({
+    new GetAllPathsRecursiveTestCase({
       guineaPig: {
         a: {
           b: [
@@ -193,7 +193,7 @@ describe("accessPointer", () => {
   )
 })
 
-describe("unfoldObject.isParent", () => {
+describe("objectPaths.isParent", () => {
   class IsParentTestCase extends Schema.Class<IsParentTestCase>("IsParentTestCase")(
     {
       self: ObjectPath,

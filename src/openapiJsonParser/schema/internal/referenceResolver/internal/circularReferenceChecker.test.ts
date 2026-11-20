@@ -307,12 +307,12 @@ const resolverTestCases = [
   })
 ]
 
-describe("resolver.checkForCircularReferences", () => {
+describe("resolver.getForCircularReferences", () => {
   it.each(resolverTestCases)(
-    "resolver.checkForCircularReferences($guineaPig) returns $expectedResultDisplay",
+    "resolver.getForCircularReferences($guineaPig) returns $expectedResultDisplay",
     ({ expectedResult, guineaPig }) => {
       expect(
-        resolver.checkForCircularReferences(guineaPig)
+        resolver.getForCircularReferences(guineaPig)
       ).toSatisfy(Equal.equals(expectedResult))
     }
   )

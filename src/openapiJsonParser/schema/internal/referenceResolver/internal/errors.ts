@@ -8,14 +8,7 @@ import {
 	SchemaAST,
 	SchemaIssue,
 } from "effect";
-import type { NonEmptyReadonlyArray } from "effect/Array";
 import type { SchemaError } from "effect/Schema";
-import { Document } from "../../..";
-import type {
-	CircularReference,
-	DirectCircularReference,
-	IndirectCircularReference,
-} from "./circularReferenceChecker";
 
 type InvalidReferenceData = { ref: string; refPropertyLocation?: string } & (
 	| {
@@ -25,12 +18,6 @@ type InvalidReferenceData = { ref: string; refPropertyLocation?: string } & (
 	  }
 	| {
 			reason: "DanglingPointer" | "InvalidPointer";
-			schemaError?: undefined;
-			ast?: undefined;
-	  }
-	| {
-			reason: "CircularReferences";
-			circularReferences: HashSet.HashSet<CircularReference>;
 			schemaError?: undefined;
 			ast?: undefined;
 	  }
@@ -121,47 +108,6 @@ export class InvalidReference extends Data.TaggedError(
 					new SchemaIssue.InvalidValue(
 						{ expected: "a valid $ref (format: #/path/to/key)" },
 						this.ref,
-					),
-				CircularReferences: (c) =>
-					new SchemaIssue.Composite(
-						Document.ast,
-						c.circularReferences.pipe(
-							Array.Array.from<CircularReference>,
-							Array.map((r) =>
-								Match.value(r).pipe(
-									Match.tagsExhaustive({
-										DirectCircularReference: (
-											direct: DirectCircularReference,
-										) =>
-											new SchemaIssue.InvalidValue({
-												message:
-													"Reference is pointing at itself or a parent: " +
-													JSON.stringify(
-														JsonPointer.formatUriFragment(direct.pointedParent.map(String)),
-													) +
-													" ← " +
-													JSON.stringify(
-														JsonPointer.formatUriFragment(direct.culpritRefKey.map(String)),
-													),
-											}),
-										IndirectCircularReference: (
-											indirect: IndirectCircularReference,
-										) =>
-											new SchemaIssue.Forbidden({
-												message:
-													"Found a circular dependency: " +
-                          pipe(
-                            indirect.keysRing.elements,
-														Array.map((el) =>
-															JSON.stringify(JsonPointer.formatUriFragment(el.map(String))),
-														),
-														Array.join(" → "),
-													),
-											}),
-									}),
-								),
-							),
-						) satisfies ReadonlyArray<SchemaIssue.Issue> as unknown as NonEmptyReadonlyArray<SchemaIssue.Issue>,
 					),
 			}),
 		);

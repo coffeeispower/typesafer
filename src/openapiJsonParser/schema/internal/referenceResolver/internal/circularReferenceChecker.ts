@@ -1,5 +1,4 @@
 import {
-  Duration,
   Equal,
   HashMap,
   HashSet,
@@ -8,14 +7,14 @@ import {
   pipe,
   Schema,
 } from "effect"
-import * as unfoldObject from "./unfoldObject"
+import * as objectPaths from "./objectPaths"
 import { ObjectPathCyclicSequence } from "./cyclicReference"
-
+export {ObjectPathCyclicSequence}
 export class DirectCircularReference extends Schema.TaggedClass<DirectCircularReference>()(
   "DirectCircularReference",
   {
-    culpritRefKey: unfoldObject.ObjectPath,
-    pointedParent: unfoldObject.ObjectPath
+    culpritRefKey: objectPaths.ObjectPath,
+    pointedParent: objectPaths.ObjectPath
   }
 ) {}
 
@@ -34,43 +33,23 @@ export const CircularReference = Schema.Union([
 export type CircularReference = typeof CircularReference.Type
 
 
-/**
- * Finds circular references inside a object with Reference objects.
- * This function assumes all references are valid and point to existing keys so make sure to check all of those before
- * calling this function otherwise it will throw.
- * This function scans recursively all objects, all arrays, all tables for Reference objects (objects containing a `$ref` key).
- *
- * @param object An object to recursively look for circular references
- * @returns All detected circular references
- */
-export function checkForCircularReferences(
+export function getForCircularReferences(
   object: unknown
 ): HashSet.HashSet<CircularReference> {
-  let time: null | number = null;
-  function recordTime(name?: string) {
-    const oldTime = time;
-    time = performance.now();
-    if (oldTime != null) {
-      console.log(name + " took: " + Duration.format(Duration.fromInputUnsafe(time - oldTime)))
-    }
-  }
   const cycles = MutableHashSet.empty<CircularReference>();
 
-  recordTime()
-  const allPaths = unfoldObject.getAllPathsRecursive(object);
-  const alreadyScannedPaths: unfoldObject.MutablePaths = MutableHashSet.empty()
-  recordTime("getAllPathsRecursive")
-  const pathsWithRef = unfoldObject.filterPathsWithRef(object, allPaths);
+  const allPaths = objectPaths.getAllPathsRecursive(object);
+  const alreadyScannedPaths: objectPaths.MutablePaths = MutableHashSet.empty()
+  const pathsWithRef = objectPaths.filterPathsWithRef(object, allPaths);
   const pathsToRef = HashMap.fromIterable(
     HashSet.map(pathsWithRef, (refPath) => {
-      const ref = pipe(unfoldObject.extract$ref(object, refPath), (ref) => unfoldObject.refToObjectPath(object, ref))
+      const ref = pipe(objectPaths.extract$ref(object, refPath), (ref) => objectPaths.refToObjectPath(object, ref))
       return [refPath, ref] as const
     })
   )
-  recordTime("filterPathsWithRef")
   for (const refPath of pathsWithRef) {
     const ref = HashMap.getUnsafe(pathsToRef, refPath)
-    if (unfoldObject.isParent(refPath, ref) || Equal.equals(refPath, ref)) {
+    if (objectPaths.isParent(refPath, ref) || Equal.equals(refPath, ref)) {
       MutableHashSet.add(cycles, DirectCircularReference.make({
         culpritRefKey: refPath,
         pointedParent: ref
@@ -78,9 +57,7 @@ export function checkForCircularReferences(
       MutableHashSet.add(alreadyScannedPaths, refPath)
     }
   }
-  recordTime("get DirectCircularReferences")
   const pathsWithRefWithoutDirectCircularReferences = pathsWithRef.pipe(HashSet.difference(HashSet.fromIterable(alreadyScannedPaths)))
-  recordTime("get pathsWithRefWithoutDirectCircularReferences")
   /**
    * Finds IndirectCircularReferences recursively by traversing the object and following the references until it reaches a dead end
    * or if it goes full round to the originalPath, it adds the historyOfPaths as a IndirectCircularReference to the `cycles` hash set.
@@ -88,11 +65,11 @@ export function checkForCircularReferences(
    * @param originalPath the original path that the for loop below called this function with
    * @param refPath Current subtree path
    */
-  function findCircularReferences(originalPath: unfoldObject.ObjectPath, refPath: unfoldObject.ObjectPath = originalPath, historyOfPaths: ReadonlyArray<unfoldObject.ObjectPath> = []) {
+  function findCircularReferences(originalPath: objectPaths.ObjectPath, refPath: objectPaths.ObjectPath = originalPath, historyOfPaths: ReadonlyArray<objectPaths.ObjectPath> = []) {
     const refOpt = HashMap.get(pathsToRef, refPath);
     if (Option.isNone(refOpt)) return;
     const { value: ref } = refOpt;
-    if ((unfoldObject.isParent(refPath, originalPath) || Equal.equals(refPath, originalPath)) && historyOfPaths.length != 0) {
+    if ((objectPaths.isParent(refPath, originalPath) || Equal.equals(refPath, originalPath)) && historyOfPaths.length != 0) {
       MutableHashSet.add(cycles, new IndirectCircularReference({
         keysRing: ObjectPathCyclicSequence.from(...historyOfPaths)
       }))

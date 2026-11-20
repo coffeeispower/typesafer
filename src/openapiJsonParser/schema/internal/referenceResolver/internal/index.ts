@@ -1,2 +1,3 @@
 export * as errors from "./errors"
-export * from "./resolver"
+export * as circularReferenceChecker from "./circularReferenceChecker";
+export * as objectPaths from "./objectPaths"
